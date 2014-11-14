@@ -8,10 +8,14 @@ using System.Data;
 using System.Text;
 using System.Windows.Forms;
 
-namespace NetOffice.DeveloperToolbox
+namespace NetOffice.DeveloperToolbox.Controls.InfoLayer
 {
     public partial class InfoControl : UserControl
     {
+        public InfoControl()
+        {
+            InitializeComponent();
+        }
 
         public InfoControl(string text)
         {
@@ -20,6 +24,12 @@ namespace NetOffice.DeveloperToolbox
             richTextBox.Text = text;            
         }
 
+        public InfoControl(Stream rtfStream)
+        {
+            InitializeComponent();
+            this.Dock = DockStyle.Fill;
+            richTextBox.LoadFile(rtfStream, RichTextBoxStreamType.RichText);
+        }
 
         public InfoControl(string text, bool isRessourceAddress)
         {
@@ -51,7 +61,6 @@ namespace NetOffice.DeveloperToolbox
             return ressourceStream;
         }
 
-       
         private void richTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             try
@@ -63,7 +72,5 @@ namespace NetOffice.DeveloperToolbox
                 ;
             }
         }
-
     }
-
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Security.Principal;
@@ -12,8 +13,10 @@ namespace NetOffice.DeveloperToolbox
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            try
+            {
                 ProceedCommandLineArguments(args);
                 if (PerformSelfElevation())
                     return;
@@ -21,44 +24,84 @@ namespace NetOffice.DeveloperToolbox
                 AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                MainForm mainForm = new MainForm(args);
+                //Form1 mainForm = new Form1();
+                //Application.Run(mainForm);
+
+                Forms.MainForm mainForm = new Forms.MainForm(args);
                 Application.Run(mainForm);
+            }
+            catch (Exception exception)
+            {
+                Forms.ErrorForm.ShowError(null, exception, Forms.ErrorCategory.Penalty, 1033);
+            }
          }
 
         private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            string assemblyName = args.Name.Substring(0, args.Name.IndexOf(",")) + ".dll";
-            string assemblyFullPath = string.Empty;
-            switch (assemblyName)
+            try
             {
-                case "ICSharpCode.SharpZipLib.dll":
-                case "Mono.Cecil.dll":
-                case "NetOffice.OutlookSecurity.dll":
-                    assemblyFullPath = string.Format("{0}\\Bin\\{1}", Application.StartupPath, assemblyName);
-                    return System.Reflection.Assembly.LoadFile(assemblyFullPath);
-                case "AccessApi.dll":
-                case "ADODBApi.dll":
-                case "DAOApi.dll":
-                case "ExcelApi.dll":
-                case "MSComctlLibApi.dll":
-                case "MSDATASRCApi.dll":
-                case "MSHTMLApi.dll":
-                case "MSProjectApi.dll":
-                case "NetOffice.dll":
-                case "OfficeApi.dll":
-                case "OutlookApi.dll":
-                case "OWC10Api.dll":
-                case "PowerPointApi.dll":
-                case "VBIDEApi.dll":
-                case "VisioApi.dll":
-                case "WordApi.dll":
-                    assemblyFullPath = string.Format("{0}\\Project Wizard\\NetOffice Assemblies\\4.0\\{1}", Application.StartupPath, assemblyName);
-                    return System.Reflection.Assembly.LoadFile(assemblyFullPath);
-                default:
-                    break;
+                string assemblyName = args.Name.Substring(0, args.Name.IndexOf(",")) + ".dll";
+                string assemblyFullPath = string.Empty;
+                switch (assemblyName)
+                {
+                    case "ICSharpCode.SharpZipLib.dll":
+                    case "Mono.Cecil.dll":
+                    case "NetOffice.OutlookSecurity.dll":
+                    case "AccessApi.dll":
+                    case "ADODBApi.dll":
+                    case "DAOApi.dll":
+                    case "ExcelApi.dll":
+                    case "MSComctlLibApi.dll":
+                    case "MSDATASRCApi.dll":
+                    case "MSHTMLApi.dll":
+                    case "MSProjectApi.dll":
+                    case "NetOffice.dll":
+                    case "OfficeApi.dll":
+                    case "OutlookApi.dll":
+                    case "OWC10Api.dll":
+                    case "PowerPointApi.dll":
+                    case "VBIDEApi.dll":
+                    case "VisioApi.dll":
+                    case "WordApi.dll":
+                    {
+                        #if DEBUG
+
+                            assemblyFullPath = Path.Combine(GetRelativeDebugPath(), "Libs", assemblyName);
+                            if (File.Exists(assemblyFullPath))
+                                return System.Reflection.Assembly.LoadFile(assemblyFullPath);
+                            else
+                                throw new FileNotFoundException(String.Format("Failed to load {0}", assemblyName));
+
+                        #else
+
+                            assemblyFullPath = string.Format("{0}\\Toolbox Bin\\{1}", Application.StartupPath, assemblyName);
+                            if (File.Exists(assemblyFullPath))
+                                return System.Reflection.Assembly.LoadFile(assemblyFullPath);
+                            else
+                                throw new FileNotFoundException(String.Format("Failed to load {0}", assemblyName));
+
+                        #endif
+                    }
+                    default:
+                        break;
+                }
+
+                return null;
             }
-            
-            return null;
+            catch (Exception exception)
+            {
+                Forms.ErrorForm.ShowError(null, exception, Forms.ErrorCategory.Penalty, 1033);
+                return null;
+            }
+        }
+
+        internal static string GetRelativeDebugPath()
+        {
+            string result = String.Empty;
+            string[] array = Application.StartupPath.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < array.Length-3; i++)
+                result += array[i] + "\\";
+            return result;
         }
 
         /// <summary>
@@ -82,8 +125,10 @@ namespace NetOffice.DeveloperToolbox
             get 
             {
                 WindowsIdentity identity = WindowsIdentity.GetCurrent();
-                WindowsPrincipal principal = new WindowsPrincipal(identity);
-                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+                WindowsPrincipal principal = new WindowsPrincipal(identity);                
+                bool result = principal.IsInRole(WindowsBuiltInRole.Administrator);
+                identity.Dispose();
+                return result;
             }
         }
 
@@ -113,7 +158,7 @@ namespace NetOffice.DeveloperToolbox
                 }
                 catch
                 {
-                    ; // The user refused the elevation. Do nothing and return directly ... (orininal MS)
+                    ; // The user refused the elevation. Do nothing and return directly ... (original MS comment)
                 }
             }
             return false;
@@ -126,8 +171,7 @@ namespace NetOffice.DeveloperToolbox
         /// <param name="e">args</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            ErrorForm errorForm = new ErrorForm(null, ErrorCategory.Penalty, 0);
-            errorForm.Show();
+            Forms.ErrorForm.ShowError(null, e.ExceptionObject as Exception, Forms.ErrorCategory.Penalty, 1033);
         }
     }
 }

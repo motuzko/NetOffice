@@ -20,10 +20,8 @@ namespace NetOffice.DeveloperToolbox
                 if (attributes.Length > 0)
                 {
                     AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-                    if (titleAttribute.Title != "")
-                    {
+                    if (titleAttribute.Title != String.Empty)
                         return titleAttribute.Title;
-                    }
                 }
                 return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
             }
@@ -49,9 +47,7 @@ namespace NetOffice.DeveloperToolbox
             {
                 object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
                 if (attributes.Length == 0)
-                {
-                    return "";
-                }
+                    return String.Empty;
                 return ((AssemblyDescriptionAttribute)attributes[0]).Description;
             }
         }
@@ -65,9 +61,7 @@ namespace NetOffice.DeveloperToolbox
             {
                 object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
                 if (attributes.Length == 0)
-                {
-                    return "";
-                }
+                    return String.Empty;
                 return ((AssemblyProductAttribute)attributes[0]).Product;
             }
         }
@@ -81,15 +75,13 @@ namespace NetOffice.DeveloperToolbox
             {
                 object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
                 if (attributes.Length == 0)
-                {
-                    return "";
-                }
+                    return String.Empty;
                 return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
             }
         }
 
         /// <summary>
-        /// Complay Markup of the Assembly
+        /// Complany Markup of the Assembly
         /// </summary>
         public static string AssemblyCompany
         {
@@ -97,9 +89,7 @@ namespace NetOffice.DeveloperToolbox
             {
                 object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
                 if (attributes.Length == 0)
-                {
-                    return "";
-                }
+                    return String.Empty;
                 return ((AssemblyCompanyAttribute)attributes[0]).Company;
             }
         }

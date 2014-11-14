@@ -10,7 +10,7 @@ Assemblies/
 Any\ CPU/
 Current\ Binaries\
 Persistance\ Cache*\
-
+Toolbox/Libs/*.zip
 
 ### SVN ###
 .svn/
